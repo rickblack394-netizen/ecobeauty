@@ -18,7 +18,7 @@
     body { background-color: #f8f9fa; }
     .hero {
       position: relative;
-      height: 40vh;
+      height: 80vh;
       color: white;
       overflow: hidden;
       display: flex;
@@ -297,10 +297,10 @@
       appId: "1:26196704025:web:81c0ec682c1cef92722388",
       measurementId: "G-GNZL686L9C"
     };
-
+    // Importa las funciones necesarias
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
     import {
-      getFirestore, collection, addDoc, serverTimestamp,
+      getFirestore, collection, addDoc, updateDoc, serverTimestamp,
       onSnapshot, query, orderBy, deleteDoc, doc
     } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
@@ -338,7 +338,6 @@
     window.addEventListener('offline', updateOnlineStatus);
     updateOnlineStatus();
 
-    
     // Cloudinary
     const cloudName = "dqyn6awff";      
     const uploadPreset = "pwa_unsigned";
@@ -446,7 +445,6 @@
           ? p.imagenes.slice(0,3).map(url => `<img src="${url}" class="thumb" alt="${p.nombre}">`).join('')
           : `<img src="${p.imagenUrl || 'https://via.placeholder.com/100x100?text=Sin+Imagen'}" class="thumb" alt="${p.nombre}">`;
 
-        // Lógica de imágenes principales para la tarjeta (usando la primera imagen)
         const mainImage = (Array.isArray(p.imagenes) && p.imagenes.length > 0) 
             ? p.imagenes[0]
             : (p.imagenUrl || 'https://via.placeholder.com/400x300?text=Sin+Imagen');
@@ -468,9 +466,12 @@
               ${(p.ingredientes && p.ingredientes.length > 0) ? `<p class="text-muted small mb-0">Ingredientes: ${p.ingredientes.join(', ')}</p>` : ''}
               ${(p.imagenes && p.imagenes.length > 0) ? `<div class="thumb-grid mt-2">${imagenesHTML}</div>${extraBadge ? `<div class="mt-1">${extraBadge}</div>` : ''}` : '<div class="text-muted small"><em>Sin imágenes</em></div>'}
             </div>
-            <div class="card-footer">
-              <button class="btn btn-sm btn-outline-danger w-100" data-action="delete" data-id="${p._id}">
-                <i class="bi bi-trash3"></i> Eliminar
+            <div class="card-footer d-flex gap-2">
+              <button class="btn btn-sm btn-outline-primary w-50" data-action="edit" data-id="${p._id}">
+                <i class="bi bi-pencil"></i>
+              </button>
+              <button class="btn btn-sm btn-outline-danger w-50" data-action="delete" data-id="${p._id}">
+                <i class="bi bi-trash3"></i>
               </button>
             </div>
           </div>`;
@@ -487,15 +488,64 @@
           }
         });
       });
+
+      // Evento de editar
+      container.querySelectorAll('[data-action="edit"]').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          const id = e.currentTarget.getAttribute('data-id');
+          openEditModal(id);
+        });
+      });
+    }
+
+    // Abre el modal y rellena el formulario para editar un producto
+    function openEditModal(id) {
+      const p = productsCache.find(x => x._id === id);
+      if (!p) return;
+      editingProduct = p;
+
+      // Set form fields
+      document.getElementById('nombreProducto').value = p.nombre || '';
+      document.getElementById('precioProducto').value = p.precio || '';
+      document.getElementById('categoriaProducto').value = p.categoria || '';
+      document.getElementById('stockProducto').value = p.stock || 0;
+      document.getElementById('ingredientesProducto').value = Array.isArray(p.ingredientes) ? p.ingredientes.join(', ') : (p.ingredientes || '');
+      document.getElementById('descripcionProducto').value = p.descripcion || '';
+      document.getElementById('crueltyFree').checked = !!p.crueltyFree;
+
+      // Preview existing images
+      previewDiv.innerHTML = '';
+      if (Array.isArray(p.imagenes) && p.imagenes.length > 0) {
+        p.imagenes.forEach(url => {
+          const img = document.createElement('img');
+          img.src = url;
+          img.className = 'thumb w-100';
+          img.style.height = '80px';
+          img.style.objectFit = 'cover';
+          previewDiv.appendChild(img);
+        });
+      }
+
+      // Update modal title and submit button
+      const modalTitle = document.querySelector('#productModal .modal-title');
+      const submitBtn = document.getElementById('submitBtn');
+      if (modalTitle) modalTitle.textContent = 'Editar Producto';
+      if (submitBtn) submitBtn.querySelector('span') || null;
+      if (submitBtn) submitBtn.innerHTML = `<span class="spinner-border spinner-border-sm d-none" id="submitSpinner"></span> Actualizar Producto`;
+
+      modal.show();
     }
 
     // Configuración de Firestore: Listener en tiempo real
     const productosRef = collection(db, 'productos');
     const q = query(productosRef, orderBy('createdAt','desc'));
 
+    let productsCache = [];
+    let editingProduct = null; // holds product object when editing
     onSnapshot(q, (snap) => {
       // Mapea los documentos de Firestore a un array de productos con el ID (_id)
       const arr = snap.docs.map(d => ({ _id: d.id, ...d.data() }));
+      productsCache = arr;
       renderProducts(arr);
     });
 
@@ -530,35 +580,68 @@
 
 
       try {
-        let imagenesUrls = [];
+        // If editingProduct is set, perform update instead of add
+        if (editingProduct) {
+          let imagenesUrls = editingProduct.imagenes || [];
+          if (imagenesInput.files.length > 0) {
+            showAlert('Subiendo imágenes a Cloudinary...', 'info');
+            imagenesUrls = await uploadImagesToCloudinary(Array.from(imagenesInput.files));
+          }
 
-        if (imagenesInput.files.length > 0) {
-          showAlert('Subiendo imágenes a Cloudinary...', 'info');
-          imagenesUrls = await uploadImagesToCloudinary(Array.from(imagenesInput.files));
+          const updateData = {
+            nombre,
+            precio,
+            descripcion,
+            categoria,
+            stock,
+            ingredientes,
+            crueltyFree,
+            imagenes: imagenesUrls,
+            imagenUrl: imagenesUrls[0] || (editingProduct.imagenUrl || ''),
+            updatedAt: serverTimestamp()
+          };
+
+          await updateDoc(doc(db, 'productos', editingProduct._id), updateData);
+          showAlert('Producto actualizado correctamente!', 'success');
+
+          // reset editing state
+          editingProduct = null;
+          // reset modal title and submit button text
+          const modalTitle = document.querySelector('#productModal .modal-title');
+          if (modalTitle) modalTitle.textContent = 'Agregar Producto';
+          if (submitBtn) submitBtn.innerHTML = `<span class="spinner-border spinner-border-sm d-none" id="submitSpinner"></span> Guardar Producto`;
+
+          e.target.reset();
+          previewDiv.innerHTML = '';
+          modal.hide();
+        } else {
+          let imagenesUrls = [];
+          if (imagenesInput.files.length > 0) {
+            showAlert('Subiendo imágenes a Cloudinary...', 'info');
+            imagenesUrls = await uploadImagesToCloudinary(Array.from(imagenesInput.files));
+          }
+
+          await addDoc(productosRef, {
+            nombre,
+            precio,
+            descripcion,
+            categoria,
+            stock,
+            ingredientes, // Campo Ecobeauty
+            crueltyFree,  // Campo Ecobeauty
+            imagenes: imagenesUrls,
+            imagenUrl: imagenesUrls[0] || '',
+            createdAt: serverTimestamp()
+          });
+
+          showAlert('Producto guardado correctamente!', 'success');
+          e.target.reset();
+          previewDiv.innerHTML = '';
+          modal.hide();
         }
-
-        await addDoc(productosRef, {
-          nombre,
-          precio,
-          descripcion,
-          categoria,
-          stock,
-          ingredientes, // Campo Ecobeauty
-          crueltyFree,  // Campo Ecobeauty
-          imagenes: imagenesUrls,
-          imagenUrl: imagenesUrls[0] || '',
-          createdAt: serverTimestamp()
-        });
-
-        showAlert('Producto guardado correctamente!', 'success');
-        
-        e.target.reset();
-        previewDiv.innerHTML = '';
-        modal.hide();
-
       } catch (error) {
         console.error('Error guardando producto:', error);
-        showAlert('Error al guardar el producto: ' + error.message, 'danger');
+        showAlert('Error al guardar el producto: ' + (error.message || error), 'danger');
       } finally {
         submitBtn.disabled = false;
         spinner.classList.add('d-none');
@@ -609,5 +692,6 @@
         setTimeout(() => particle.remove(), 1000);
     }
   </script>
+  <!-- Firebase Auth verification removed per user request -->
 </body>
 </html>
