@@ -211,23 +211,15 @@
             <a class="navbar-brand" href="#"><img src="Flor.png" width="100">
                  EcoBeauty
             </a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                <span class="navbar-toggler-icon"></span>
-            </button>
+            
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ms-auto">
-                    <li class="nav-item me-3">
-                        <a class="nav-link position-relative" href="#" data-bs-toggle="modal" data-bs-target="#cartModal">
-                            <i class="fas fa-shopping-cart fa-lg"></i>
-                            <span id="cart-count" class="badge rounded-pill bg-danger position-absolute top-0 start-100 translate-middle" style="display: none;">0</span>
-                        </a>
-                    </li>
                     <li class="nav-item">
                         <li class="nav-item"><a class="nav-link" href="clientes.html">Cliente</a></li>
                         <a class="nav-link" href="admin.html">Administrador</a>
                         
                     </li>
-                </ul>
+                    
             </div>
         </div>
     </nav>
@@ -237,6 +229,11 @@
             <source src="animaIndex.mp4" type="video/mp4">
             Tu navegador no soporta videos HTML5
         </video>
+        <!-- Audio de fondo separado -->
+        <audio id="bg-audio" loop preload="auto" src="sounfFondo.mp3"></audio>
+        <button id="audio-toggle-btn" class="btn btn-sm btn-outline-light" aria-pressed="false" title="Activar audio de fondo" style="position:absolute; right:16px; top:16px; z-index:2;">
+            <i id="audio-icon" class="fas fa-volume-mute"></i>
+        </button>
         <div class="container text-center">
             <h1 class="display-3 fw-bold mb-4">Belleza Natural y Consciente</h1>
             <p class="lead mb-4">Descubre nuestra línea de cosméticos naturales, libres de químicos y crueldad animal</p>
@@ -293,149 +290,31 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 
+    <!-- Modal para pedir contraseña antes de ir a admin.html (movido aquí para evitar anidamiento en el nav) -->
+    <div class="modal fade" id="adminPassModal" tabindex="-1" aria-labelledby="adminPassModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-sm modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="adminPassModalLabel">Acceso Administrador</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                </div>
+                <form id="admin-pass-form">
+                    <div class="modal-body">
+                        <div class="mb-2">
+                            <label for="admin-pass-input" class="form-label">Contraseña</label>
+                            <input id="admin-pass-input" type="password" class="form-control" required autocomplete="current-password" />
+                        </div>
+                        <div id="admin-pass-alert" class="alert alert-danger py-2 small d-none" role="alert"></div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-eco">Entrar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
     <script>
-        // La clave de LocalStorage es CLAVE para la sincronización
-        const LS_CART_KEY = 'ecobeautyCart';
-        
-        // --- FUNCIONES CORE DEL CARRITO ---
-
-        function getCart() {
-            const cartString = localStorage.getItem(LS_CART_KEY);
-            return cartString ? JSON.parse(cartString) : [];
-        }
-
-        function saveCart(cart) {
-            localStorage.setItem(LS_CART_KEY, JSON.stringify(cart));
-        }
-
-        function updateCartCount() {
-            const cart = getCart();
-            const countElement = document.getElementById('cart-count');
-            
-            const totalItems = cart.reduce((total, product) => total + product.quantity, 0);
-            
-            countElement.textContent = totalItems;
-            countElement.style.display = totalItems > 0 ? 'inline-block' : 'none';
-        }
-
-        function addToCart(product) {
-            let cart = getCart();
-            const existingProductIndex = cart.findIndex(item => item.id === product.id);
-
-            if (existingProductIndex > -1) {
-                cart[existingProductIndex].quantity += 1;
-            } else {
-                cart.push({ ...product, quantity: 1 });
-            }
-
-            saveCart(cart);
-            updateCartCount();
-        }
-        
-        function changeQuantity(productId, amount) {
-            let cart = getCart();
-            const productIndex = cart.findIndex(item => item.id === productId);
-
-            if (productIndex > -1) {
-                cart[productIndex].quantity += amount;
-                
-                if (cart[productIndex].quantity <= 0) {
-                    cart.splice(productIndex, 1);
-                }
-            }
-            
-            saveCart(cart);
-            updateCartCount();
-            renderCartItems(); 
-        }
-        
-        function removeFromCart(productId) {
-            let cart = getCart();
-            cart = cart.filter(item => item.id !== productId);
-            
-            saveCart(cart);
-            updateCartCount();
-            renderCartItems();
-        }
-
-        function renderCartItems() {
-            const cart = getCart();
-            const container = document.getElementById('cart-items-container');
-            const totalElement = document.getElementById('cart-total');
-            const checkoutButton = document.getElementById('checkout-btn');
-            
-            let totalCost = 0;
-            let html = '';
-
-            if (cart.length === 0) {
-                html = '<p class="text-center text-muted">El carrito está vacío. ¡Empieza a agregar productos!</p>';
-                checkoutButton.disabled = true;
-            } else {
-                html = '<ul class="list-group">';
-                
-                cart.forEach(product => {
-                    // Asegura que price sea un número antes de multiplicar
-                    const price = parseFloat(product.price) || 0;
-                    const subtotal = price * product.quantity;
-                    totalCost += subtotal;
-                    
-                    html += `
-                        <li class="list-group-item d-flex justify-content-between align-items-center py-3">
-                            <div class="d-flex align-items-center w-50">
-                                <strong>${product.name}</strong> 
-                            </div>
-
-                            <div class="d-flex align-items-center">
-                                <div class="btn-group btn-group-sm me-3" role="group">
-                                    <button type="button" class="btn btn-outline-secondary" onclick="changeQuantity('${product.id}', -1)">
-                                        <i class="fas fa-minus"></i>
-                                    </button>
-                                    <span class="btn btn-light" style="width: 40px; pointer-events: none;">${product.quantity}</span>
-                                    <button type="button" class="btn btn-outline-secondary" onclick="changeQuantity('${product.id}', 1)">
-                                        <i class="fas fa-plus"></i>
-                                    </button>
-                                </div>
-                                
-                                <div class="text-end me-3">
-                                    $${price.toFixed(2)} c/u<br>
-                                    <strong>$${subtotal.toFixed(2)}</strong>
-                                </div>
-
-                                <button type="button" class="btn btn-danger btn-sm" onclick="removeFromCart('${product.id}')">
-                                    <i class="fas fa-trash"></i>
-                                </button>
-                            </div>
-                        </li>
-                    `;
-                });
-                
-                html += '</ul>';
-                checkoutButton.disabled = false;
-            }
-
-            container.innerHTML = html;
-            totalElement.textContent = `$${totalCost.toFixed(2)}`;
-        }
-        
-        function checkout() {
-            const cart = getCart();
-            
-            if (cart.length === 0) {
-                alert('Tu carrito está vacío. No hay nada que comprar.');
-                return;
-            }
-            
-            localStorage.removeItem(LS_CART_KEY);
-            updateCartCount();
-            
-            const cartModalElement = document.getElementById('cartModal');
-            const modal = bootstrap.Modal.getInstance(cartModalElement) || new bootstrap.Modal(cartModalElement);
-            modal.hide();
-            
-            const checkoutToast = document.getElementById('checkoutToast');
-            const toast = new bootstrap.Toast(checkoutToast);
-            toast.show();
-        }
 
 
         // --- INICIALIZACIÓN Y LISTENERS ---
@@ -479,6 +358,51 @@
     </script>
 
     <script>
+        // Control de audio de fondo: activar/desactivar y persistir preferencia
+        (function(){
+            const video = document.querySelector('.hero video');
+            const audio = document.getElementById('bg-audio');
+            const btn = document.getElementById('audio-toggle-btn');
+            const icon = document.getElementById('audio-icon');
+            const LS_KEY = 'ecobeautyVideoSound';
+
+            if (!btn || !icon) return;
+
+            // Inicializa según LocalStorage
+            const saved = localStorage.getItem(LS_KEY);
+            if (saved === 'on') {
+                try { if (video) video.muted = false; } catch(e){}
+                try { if (audio) { audio.volume = 1; audio.play().catch(()=>{}); } } catch(e){}
+                btn.setAttribute('aria-pressed','true');
+                icon.classList.replace('fa-volume-mute','fa-volume-up');
+            } else {
+                try { if (video) video.muted = true; } catch(e){}
+                try { if (audio) { audio.pause(); audio.currentTime = 0; } } catch(e){}
+                btn.setAttribute('aria-pressed','false');
+                icon.classList.replace('fa-volume-up','fa-volume-mute');
+            }
+
+            btn.addEventListener('click', (e) => {
+                e.preventDefault();
+                const nowMuted = video ? video.muted : true;
+                try { if (video) video.muted = !nowMuted; } catch(e){}
+
+                if (video && video.muted) {
+                    localStorage.setItem(LS_KEY, 'off');
+                    try { if (audio) { audio.pause(); audio.currentTime = 0; } } catch(e){}
+                    btn.setAttribute('aria-pressed','false');
+                    icon.classList.replace('fa-volume-up','fa-volume-mute');
+                } else {
+                    localStorage.setItem(LS_KEY, 'on');
+                    try { if (audio) audio.play().catch(()=>{}); } catch(e){}
+                    btn.setAttribute('aria-pressed','true');
+                    icon.classList.replace('fa-volume-mute','fa-volume-up');
+                }
+            });
+        })();
+    </script>
+
+    <script>
         // Efecto de partículas siguiendo el mouse
         const particleContainer = document.body;
         let mouseX = 0;
@@ -515,6 +439,57 @@
             // Eliminar la partícula después de la animación
             setTimeout(() => particle.remove(), 1000);
         }
+    </script>
+
+    <script>
+        // Intercept clicks to admin.html and require password via modal
+        document.addEventListener('DOMContentLoaded', () => {
+            // Change this password as needed — note: client-side check only
+            const ADMIN_PASSWORD = 'admin123';
+
+            const adminModalEl = document.getElementById('adminPassModal');
+            const adminForm = document.getElementById('admin-pass-form');
+            const passInput = document.getElementById('admin-pass-input');
+            const alertEl = document.getElementById('admin-pass-alert');
+
+            // Initialize Bootstrap modal instance
+            let adminBsModal = null;
+            if (adminModalEl && typeof bootstrap !== 'undefined') {
+                adminBsModal = new bootstrap.Modal(adminModalEl);
+            }
+
+            // Attach click handlers to any link that points to admin.html
+            const adminLinks = document.querySelectorAll('a[href$="admin.html"]');
+            adminLinks.forEach(link => {
+                link.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    // remember the target href in the modal element
+                    adminModalEl.dataset.targetHref = link.getAttribute('href');
+                    if (adminBsModal) adminBsModal.show();
+                    passInput.value = '';
+                    if (alertEl) alertEl.classList.add('d-none');
+                });
+            });
+
+            // Handle form submit
+            if (adminForm) {
+                adminForm.addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    const val = (passInput.value || '').trim();
+                    if (val === ADMIN_PASSWORD) {
+                        // success — redirect
+                        const target = adminModalEl.dataset.targetHref || 'admin.html';
+                        if (adminBsModal) adminBsModal.hide();
+                        window.location.href = target;
+                    } else {
+                        if (alertEl) {
+                            alertEl.textContent = 'Contraseña incorrecta';
+                            alertEl.classList.remove('d-none');
+                        }
+                    }
+                });
+            }
+        });
     </script>
 </body>
 </html>
