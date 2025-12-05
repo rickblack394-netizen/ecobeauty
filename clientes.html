@@ -7,6 +7,8 @@
     <link rel="manifest" href="manifest.json">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <script src="https://www.paypal.com/sdk/js?client-id=ASSG_5mPNJ3uL2e3fO8zIHlcDS2P95lrTOYgf-Cy4r1Wt7zUyBFxNLKPm6Iv11DWbFoa-qz91FhYXitu&currency=MXN"></script>
+ 
     <style>
         :root {
             --primary-color: #7C9D6E;
@@ -147,7 +149,145 @@
                 opacity: 0;
             }
         }
+
+        /* --- NAVBAR RESPONSIVE --- */
+        .navbar {
+            padding: 0.5rem 0;
+        }
+
+        .navbar-brand {
+            display: flex;
+            align-items: center;
+            font-weight: bold;
+            color: var(--primary-color) !important;
+        }
+
+        .navbar-brand img {
+            transition: transform 0.3s ease;
+        }
+
+        .navbar-brand:hover img {
+            transform: scale(1.05);
+        }
+
+        .navbar-toggler {
+            border: none;
+            padding: 0.25rem 0.5rem;
+        }
+
+        .navbar-toggler:focus {
+            box-shadow: none;
+            border: 1px solid var(--primary-color);
+            border-radius: 5px;
+        }
+
+        .nav-link {
+            color: var(--text-dark) !important;
+            font-weight: 500;
+            transition: color 0.3s ease;
+            position: relative;
+        }
+
+        .nav-link:hover {
+            color: var(--primary-color) !important;
+        }
+
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background-color: var(--primary-color);
+            transition: width 0.3s ease;
+        }
+
+        .nav-link:hover::after {
+            width: 100%;
+        }
+
+        .dropdown-menu {
+            border: none;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            animation: slideDown 0.2s ease-out;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .dropdown-item {
+            transition: all 0.3s ease;
+        }
+
+        .dropdown-item:hover {
+            background-color: var(--secondary-color);
+            color: var(--primary-color);
+        }
+
+        /* Responsive para móviles */
+        @media (max-width: 991px) {
+            .navbar-brand span {
+                display: none;
+            }
+
+            .navbar-brand img {
+                width: 40px;
+                height: 40px;
+            }
+
+            .input-group {
+                width: 150px !important;
+            }
+
+            .navbar-collapse {
+                margin-top: 0.5rem;
+                border-top: 1px solid #e0e0e0;
+                padding-top: 0.5rem;
+            }
+
+            .nav-link::after {
+                display: none;
+            }
+
+            .nav-item {
+                padding: 0.3rem 0;
+            }
+
+            .dropdown-menu {
+                background-color: var(--secondary-color);
+                border-left: 3px solid var(--primary-color);
+            }
+        }
+
+        /* Make dropdown toggle visually match other nav links */
+        .nav-link.dropdown-toggle {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+            color: var(--text-dark) !important;
+        }
+
+        /* Hide Bootstrap caret so it doesn't look like a button */
+        .nav-link.dropdown-toggle::after {
+            display: none;
+        }
+
+        /* Ensure dropdown items inherit nav-link hover style */
+        .dropdown-item {
+            color: var(--text-dark) !important;
+        }
     </style>
+
 </head>
 <body>
 
@@ -162,35 +302,43 @@
         </div>
     </div>
     
-    <nav class="navbar navbar-expand-lg navbar-light bg-light sticky-top shadow-sm">
+    <nav class="navbar navbar-expand-lg navbar-light bg-light sticky-top">
         <div class="container">
             <a class="navbar-brand" href="index.html"><img src="Flor.png" width="100" height="100">
-                 EcoBeauty
+                EcoBeauty
             </a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav ms-auto align-items-center">
-                    <li class="nav-item me-3">
-                        <div class="input-group">
-                            <input type="text" class="form-control form-control-sm" id="search-input" placeholder="Buscar..." style="border-radius: 20px 0 0 20px; border-right: none;">
-                            <button class="btn btn-outline-success btn-sm" type="button" id="search-btn" style="border-radius: 0 20px 20px 0;">
-                                <i class="fas fa-search"></i>
-                            </button>
-                        </div>
-                    </li>
-                    
-                    <li class="nav-item me-3">
-                        <a class="nav-link position-relative" href="#" data-bs-toggle="modal" data-bs-target="#cartModal">
-                            <i class="fas fa-shopping-bag fa-lg"></i>
-                            <span id="cart-count" class="position-absolute top-10 start-100 translate-middle badge rounded-pill bg-success" style="font-size: 0.6rem; display: none;">0</span>
-                        </a>
-                    </li>
+            
+            <div class="d-flex align-items-center order-lg-last gap-2">
+                <!-- Buscador -->
+                <div class="input-group input-group-sm" style="width: 200px;">
+                    <input type="text" class="form-control" id="search-input" placeholder="Buscar..." style="border-radius: 20px 0 0 20px; border-right: none;">
+                    <button class="btn btn-outline-success btn-sm" type="button" id="search-btn" style="border-radius: 0 20px 20px 0;">
+                        <i class="fas fa-search"></i>
+                    </button>
+                </div>
+                
+                <!-- Carrito -->
+                <a class="nav-link position-relative" href="#" data-bs-toggle="modal" data-bs-target="#cartModal" title="Carrito de compras">
+                    <i class="fas fa-shopping-bag fa-lg"></i>
+                    <span id="cart-count" class="position-absolute top-10 start-100 translate-middle badge rounded-pill bg-success" style="font-size: 0.6rem; display: none;">0</span>
+                </a>
+                
+                <!-- Hamburger Toggle -->
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+            </div>
 
-                    <li class="nav-item ms-2"><a class="nav-link" href="#inicio">Inicio</a></li>
+            <!-- Menú Colapsable -->
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto mt-3 mt-lg-0">
+                    <li class="nav-item">
+                        <a class="nav-link" href="#inicio">Inicio</a>
+                    </li>
                     <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">Categorías</a>
+                        <a class="nav-link" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            Categorías <i class="fas fa-caret-down" style="font-size: 0.75em; margin-left: 0.25rem;"></i>
+                        </a>
                         <ul class="dropdown-menu">
                             <li><a class="dropdown-item" href="#todos">Todo</a></li>
                             <li><a class="dropdown-item" href="#cabello">Cabello</a></li>
@@ -198,9 +346,15 @@
                             <li><a class="dropdown-item" href="#rostro">Rostro</a></li>
                         </ul>
                     </li>
-                    <li class="nav-item"><a class="nav-link" href="#nosotros">Nosotros</a></li>
-                     <li class="nav-item"><a class="nav-link" href="#contacto">Contacto</a></li>
-                    <li class="nav-item"><a class="nav-link" href="admin.html">Admin</a></li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#nosotros">Nosotros</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#contacto">Contacto</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="admin.html">Admin</a>
+                    </li>
                 </ul>
             </div>
         </div>
@@ -288,33 +442,33 @@
     </section>
 
     <section class="py-5 eco-bg" id="contacto">
-        <div class="container">
-            <h2 class="text-center mb-5">Contáctanos</h2>
-            <div class="row justify-content-center">
-                <div class="col-md-6">
-                    <form>
-                        <div class="mb-3">
-                            <input type="text" class="form-control" placeholder="Nombre">
-                        </div>
-                        <div class="mb-3">
-                            <input type="email" class="form-control" placeholder="Email">
-                        </div>
-                        <div class="mb-3">
-                            <textarea class="form-control" rows="4" placeholder="Mensaje"></textarea>
-                        </div>
-                        <button type="submit" class="btn btn-eco w-100">Enviar Mensaje</button>
-                    </form>
-                </div>
-            </div>
-        </div>
-    </section>
+        <div class="container">
+            <h2 class="text-center mb-5">Contáctanos</h2>
+            <div class="row justify-content-center">
+                <div class="col-md-6 text-center">
+                    <p class="lead mb-4">¡Chatea con nosotros directamente! Haz clic en el botón de abajo para iniciar una conversación instantánea en WhatsApp.</p>
+                    
+                                                                                <a 
+                        href="https://wa.me/527201885871?text=Hola,%20quisiera%20consultar%20sobre%20sus%20productos%20EcoBeauty." 
+                        target="_blank" 
+                        class="btn btn-eco btn-lg"
+                        rel="noopener noreferrer"
+                    >
+                        <i class="fab fa-whatsapp me-2"></i> Chatear por WhatsApp
+                    </a>
+                                        
+                    <p class="mt-3 text-muted small">Tiempo de respuesta habitual: 1 hora.</p>
+                </div>
+            </div>
+        </div>
+    </section>
 
     <footer class="footer py-4 mt-auto">
         <div class="container text-center">
-            <p class="mb-0">&copy; 2024 EcoBeauty. Todos los derechos reservados.</p>
+            <p class="mb-0">&copy; 2025 EcoBeauty. Todos los derechos reservados.</p>
             <div class="mt-2">
                 <a href="#" class="text-white mx-2"><i class="fab fa-instagram"></i></a>
-                <a href="#" class="text-white mx-2"><i class="fab fa-facebook"></i></a>
+                <a href="https://www.facebook.com/profile.php?id=61563257603667" class="text-white mx-2"><i class="fab fa-facebook"></i></a>
             </div>
         </div>
     </footer>
@@ -336,12 +490,89 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Seguir mirando</button>
-                    <button type="button" class="btn btn-eco" onclick="window.checkout()">Pagar Ahora</button>
+                    <button type="button" class="btn btn-eco" onclick="window.openCheckout()">Pagar Ahora</button>
                 </div>
             </div>
         </div>
     </div>
 
+    <!-- Modal de Checkout con métodos de pago -->
+    <div class="modal fade" id="checkoutModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="fas fa-credit-card me-2"></i> Selecciona tu método de pago</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row g-3 mb-4">
+                        <!-- Opción PayPal -->
+                        <div class="col-md-6">
+                            <div class="card h-100 cursor-pointer payment-option" onclick="window.selectPaymentMethod('paypal')" style="border: 2px solid #ddd; cursor: pointer; transition: all 0.3s;">
+                                <div class="card-body text-center">
+                                    <i class="fab fa-paypal fa-3x text-primary mb-3"></i>
+                                    <h5 class="card-title">PayPal</h5>
+                                    <p class="card-text text-muted small">Pago seguro con tu cuenta PayPal</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Opción Tarjeta de Crédito -->
+                        <div class="col-md-6">
+                            <div class="card h-100 cursor-pointer payment-option" onclick="window.selectPaymentMethod('card')" style="border: 2px solid #ddd; cursor: pointer; transition: all 0.3s;">
+                                <div class="card-body text-center">
+                                    <i class="fas fa-credit-card fa-3x text-success mb-3"></i>
+                                    <h5 class="card-title">Tarjeta de Crédito/Débito</h5>
+                                    <p class="card-text text-muted small">Visa, Mastercard, American Express</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Contenedor PayPal Buttons -->
+                    <div id="paypal-container" style="display: none;" class="mb-3">
+                        <h6 class="mb-3">Resumen de tu compra:</h6>
+                        <div id="paypal-summary" class="mb-3 p-3 bg-light rounded"></div>
+                    </div>
+
+                    <!-- Contenedor Tarjeta -->
+                    <div id="card-container" style="display: none;">
+                        <h6 class="mb-3">Datos de la tarjeta:</h6>
+                        <form id="card-form">
+                            <div class="mb-3">
+                                <label class="form-label">Nombre Completo</label>
+                                <input type="text" class="form-control" id="card-name" placeholder="Juan Pérez" required>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Correo Electrónico</label>
+                                <input type="email" class="form-control" id="card-email" placeholder="tu@email.com" required>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Número de Tarjeta</label>
+                                <input type="text" class="form-control" id="card-number" placeholder="1234 5678 9012 3456" maxlength="19" required>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <label class="form-label">Vencimiento (MM/AA)</label>
+                                    <input type="text" class="form-control" id="card-expiry" placeholder="12/25" maxlength="5" required>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">CVV</label>
+                                    <input type="text" class="form-control" id="card-cvv" placeholder="123" maxlength="3" required>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-eco" id="btn-complete-payment" style="display: none;" onclick="window.completePayment()">Completar Pago</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Admin -->
     <div class="modal fade" id="adminPassModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-sm modal-dialog-centered">
             <div class="modal-content">
@@ -364,7 +595,7 @@
     
     <script type="module">
         /* -------------------------------------------------------------------------- */
-        /* CONFIGURACIÓN (Solo se mantiene lo necesario para Firestore) */
+        /* CONFIGURACIÓN (Solo Firestore) */
         /* -------------------------------------------------------------------------- */
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
         import { 
@@ -384,7 +615,7 @@
         const db = getFirestore(app);
 
         /* -------------------------------------------------------------------------- */
-        /* VARIABLES GLOBALES (Se simplifican)              */
+        /* VARIABLES GLOBALES */
         /* -------------------------------------------------------------------------- */
         let allProducts = [];
         
@@ -393,7 +624,7 @@
         const loadingSpinner = document.getElementById('loading-spinner');
 
         /* -------------------------------------------------------------------------- */
-        /* GESTIÓN DE AUTENTICACIÓN (ELIMINADA)           */
+        /* GESTIÓN DE AUTENTICACIÓN                         */
         /* -------------------------------------------------------------------------- */
         
         /* -------------------------------------------------------------------------- */
@@ -450,7 +681,7 @@
         }
 
         /* -------------------------------------------------------------------------- */
-        /* CARRITO DE COMPRAS (Sin verificación de login)  */
+        /* CARRITO DE COMPRAS (Requiere autenticación)  */
         /* -------------------------------------------------------------------------- */
         
         // Manejador del clic "Agregar"
@@ -464,7 +695,7 @@
             };
 
             window.addToCart(product);
-            showToast('Producto agregado al carrito');
+            window.showToast('Producto agregado al carrito');
         }
 
         // --- Funciones del carrito (Globales para el HTML) ---
@@ -506,15 +737,192 @@
             saveCart(cart);
         };
 
-        window.checkout = function() {
+        window.openCheckout = function() {
             const cart = getCart();
-            if (cart.length === 0) return;
-            // Simular compra
-            localStorage.removeItem(CART_KEY);
-            updateCartUI();
-            const modal = bootstrap.Modal.getInstance(document.getElementById('cartModal'));
-            modal.hide();
-            showToast('¡Gracias por tu compra!');
+            if (cart.length === 0) {
+                window.showToast('El carrito está vacío');
+                return;
+            }
+            
+            // Ocultar ambos contenedores
+            document.getElementById('paypal-container').style.display = 'none';
+            document.getElementById('card-container').style.display = 'none';
+            document.getElementById('btn-complete-payment').style.display = 'none';
+            
+            // Mostrar modal de checkout
+            const cartModal = bootstrap.Modal.getInstance(document.getElementById('cartModal'));
+            cartModal.hide();
+            
+            setTimeout(() => {
+                const checkoutModal = new bootstrap.Modal(document.getElementById('checkoutModal'));
+                checkoutModal.show();
+            }, 300);
+        };
+
+        window.selectPaymentMethod = function(method) {
+            const cart = getCart();
+            const total = cart.reduce((acc, item) => acc + (item.price * item.quantity), 0);
+            
+            // Actualizar estilos de las tarjetas
+            document.querySelectorAll('.payment-option').forEach(card => {
+                card.style.borderColor = '#ddd';
+                card.style.backgroundColor = 'white';
+            });
+            
+            if (method === 'paypal') {
+                event.currentTarget.style.borderColor = '#003087';
+                event.currentTarget.style.backgroundColor = '#f0f0f0';
+                
+                // Mostrar PayPal
+                document.getElementById('paypal-container').style.display = 'block';
+                document.getElementById('card-container').style.display = 'none';
+                document.getElementById('btn-complete-payment').style.display = 'none';
+                
+                // Renderizar resumen
+                let summaryHTML = '<ul class="list-group list-group-sm">';
+                cart.forEach(item => {
+                    summaryHTML += `<li class="list-group-item d-flex justify-content-between"><span>${item.name} x${item.quantity}</span><span>$${(item.price * item.quantity).toFixed(2)}</span></li>`;
+                });
+                summaryHTML += `<li class="list-group-item d-flex justify-content-between fw-bold"><span>Total:</span><span class="text-success">$${total.toFixed(2)}</span></li></ul>`;
+                document.getElementById('paypal-summary').innerHTML = summaryHTML;
+                
+                // Renderizar botones PayPal
+                renderPayPalButton(total);
+                
+            } else if (method === 'card') {
+                event.currentTarget.style.borderColor = '#28a745';
+                event.currentTarget.style.backgroundColor = '#f0f0f0';
+                
+                // Mostrar tarjeta
+                document.getElementById('card-container').style.display = 'block';
+                document.getElementById('paypal-container').style.display = 'none';
+                document.getElementById('btn-complete-payment').style.display = 'block';
+                
+                // Formatear número de tarjeta
+                document.getElementById('card-number').addEventListener('input', function(e) {
+                    let value = e.target.value.replace(/\s+/g, '').replace(/[^0-9]/gi, '');
+                    let formattedValue = value.replace(/(.{4})/g, '$1 ').trim();
+                    e.target.value = formattedValue;
+                });
+                
+                // Formatear vencimiento
+                document.getElementById('card-expiry').addEventListener('input', function(e) {
+                    let value = e.target.value.replace(/\D/g, '');
+                    if (value.length >= 2) {
+                        value = value.slice(0, 2) + '/' + value.slice(2, 4);
+                    }
+                    e.target.value = value;
+                });
+            }
+        };
+
+        function renderPayPalButton(total) {
+            const container = document.getElementById('paypal-button-container');
+            
+            // Limpiar contenedor anterior si existe
+            if (container) container.innerHTML = '';
+            
+            // Crear el contenedor si no existe
+            if (!container) {
+                const newContainer = document.createElement('div');
+                newContainer.id = 'paypal-button-container';
+                newContainer.style.marginTop = '20px';
+                document.getElementById('paypal-summary').parentNode.appendChild(newContainer);
+            }
+            
+            // Renderizar botones PayPal
+            paypal.Buttons({
+                createOrder: function(data, actions) {
+                    const cart = getCart();
+                    return actions.order.create({
+                        purchase_units: [{
+                            amount: {
+                                value: total.toFixed(2),
+                                currency_code: 'MXN',
+                                breakdown: {
+                                    item_total: {
+                                        currency_code: 'MXN',
+                                        value: total.toFixed(2)
+                                    }
+                                }
+                            },
+                            items: cart.map(item => ({
+                                name: item.name,
+                                quantity: item.quantity.toString(),
+                                unit_amount: {
+                                    currency_code: 'MXN',
+                                    value: item.price.toFixed(2)
+                                }
+                            }))
+                        }]
+                    });
+                },
+                onApprove: function(data, actions) {
+                    return actions.order.capture().then(function(orderData) {
+                        console.log('Compra completada:', orderData);
+                        localStorage.removeItem(CART_KEY);
+                        updateCartUI();
+                        
+                        // Cerrar modales
+                        bootstrap.Modal.getInstance(document.getElementById('checkoutModal')).hide();
+                        
+                        // Mostrar mensaje de éxito
+                        window.showToast('¡Pago con PayPal completado exitosamente!');
+                        
+                        setTimeout(() => {
+                            alert(`Orden PayPal #${orderData.id} completada. ¡Gracias por tu compra!`);
+                        }, 500);
+                    });
+                },
+                onError: function(err) {
+                    console.error('Error en PayPal:', err);
+                    window.showToast('Error en el pago con PayPal. Intenta de nuevo.');
+                }
+            }).render('#paypal-button-container');
+        }
+
+        window.completePayment = function() {
+            const form = document.getElementById('card-form');
+            if (!form.checkValidity()) {
+                form.reportValidity();
+                return;
+            }
+            
+            const name = document.getElementById('card-name').value;
+            const email = document.getElementById('card-email').value;
+            const cardNumber = document.getElementById('card-number').value.replace(/\s+/g, '');
+            
+            // Validación básica de tarjeta
+            if (cardNumber.length < 13 || cardNumber.length > 19) {
+                window.showToast('Número de tarjeta inválido');
+                return;
+            }
+            
+            // Simular procesamiento de pago
+            const btn = document.getElementById('btn-complete-payment');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Procesando...';
+            btn.disabled = true;
+            
+            setTimeout(() => {
+                // Limpiar carrito
+                localStorage.removeItem(CART_KEY);
+                updateCartUI();
+                
+                // Cerrar modal
+                bootstrap.Modal.getInstance(document.getElementById('checkoutModal')).hide();
+                
+                // Mostrar éxito
+                window.showToast('¡Pago procesado exitosamente!');
+                
+                setTimeout(() => {
+                    alert(`Pago exitoso para ${name}. Tu tarjeta terminada en ${cardNumber.slice(-4)} ha sido cobrada. ¡Gracias por tu compra!`);
+                    // Restaurar botón
+                    btn.innerHTML = originalText;
+                    btn.disabled = false;
+                    document.getElementById('card-form').reset();
+                }, 500);
+            }, 2000);
         };
 
         function updateCartUI() {
@@ -655,20 +1063,44 @@
             }
         });
 
-        // Efecto partículas (MODIFICADO para mayor dispersión y duración)
+        // Efecto de partículas siguiendo el mouse
+        const particleContainer = document.body;
+        let mouseX = 0;
+        let mouseY = 0;
+
         document.addEventListener('mousemove', (e) => {
-            // Se genera una partícula el 95% de las veces para mayor dispersión
-            if (Math.random() > 0.5) { 
-                const p = document.createElement('div');
-                p.className = 'particle-cursor';
-                p.style.left = e.pageX + 'px';
-                p.style.top = e.pageY + 'px';
-                document.body.appendChild(p);
-                // Duración aumentada a 2 segundos (2000ms)
-                setTimeout(() => p.remove(), 2000); 
-            }
+            mouseX = e.clientX;
+            mouseY = e.clientY;
+
+            // Crear partículas en cada movimiento del mouse
+            createParticle(mouseX, mouseY);
         });
+
+        function createParticle(x, y) {
+            const particle = document.createElement('div');
+            particle.className = 'particle-cursor';
+            
+            // Dirección aleatoria para las partículas
+            const randomX = (Math.random() - 0.5) * 100;
+            const randomY = (Math.random() - 0.5) * 100;
+            
+            particle.style.setProperty('--tx', randomX + 'px');
+            particle.style.setProperty('--ty', randomY + 'px');
+            particle.style.left = x + 'px';
+            particle.style.top = y + 'px';
+            
+            // Tamaño aleatorio
+            const randomSize = 5 + Math.random() * 10;
+            particle.style.width = randomSize + 'px';
+            particle.style.height = randomSize + 'px';
+            
+            particleContainer.appendChild(particle);
+            
+            // Eliminar la partícula después de la animación
+            setTimeout(() => particle.remove(), 1000);
+        }
     </script>
 </body>
 </html>
+
 
