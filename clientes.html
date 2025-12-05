@@ -16,6 +16,32 @@
             --accent-color: #4A6741;
             --text-dark: #333;
         }
+
+        /* WhatsApp button: center and show text on larger screens (match block centering of the heading) */
+        #contacto .col-md-6 {
+            text-align: center;
+        }
+
+        /* Make the WhatsApp button behave like a block element so it's centered exactly like the H2 */
+        #contacto .btn-whatsapp {
+            display: block;
+            width: auto;
+            padding: 0.6rem 1rem;
+            margin: 0.75rem auto;
+            border-radius: 30px;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+        }
+
+        #contacto .btn-whatsapp i {
+            vertical-align: middle;
+        }
+
+        #contacto .btn-whatsapp .btn-text {
+            display: inline-block;
+            vertical-align: middle;
+        }
         
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -247,12 +273,27 @@
 
             .input-group {
                 width: 150px !important;
+                margin: 0 auto;
             }
 
             .navbar-collapse {
                 margin-top: 0.5rem;
                 border-top: 1px solid #e0e0e0;
                 padding-top: 0.5rem;
+                text-align: center;
+            }
+
+            /* Center the collapsed menu items */
+            .navbar-collapse .navbar-nav {
+                justify-content: center;
+                display: flex;
+            }
+
+            /* Center the search/cart/hamburger row on mobile */
+            .navbar .d-flex.order-lg-last {
+                width: 100%;
+                justify-content: center;
+                margin-top: 0.5rem;
             }
 
             .nav-link::after {
@@ -266,6 +307,33 @@
             .dropdown-menu {
                 background-color: var(--secondary-color);
                 border-left: 3px solid var(--primary-color);
+            }
+
+            /* Center WhatsApp button in contacto section on small screens */
+            #contacto .btn-eco {
+                display: inline-block;
+                margin: 0.75rem auto;
+            }
+            #contacto .col-md-6 {
+                text-align: center;
+            }
+
+            /* WhatsApp round icon-only button */
+            #contacto .btn-whatsapp {
+                width: 56px;
+                height: 56px;
+                padding: 0;
+                border-radius: 50%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                margin: 0.75rem auto;
+                font-size: 1.25rem;
+            }
+
+            /* Hide textual label on mobile */
+            #contacto .btn-whatsapp .btn-text {
+                display: none;
             }
         }
 
@@ -285,6 +353,35 @@
         /* Ensure dropdown items inherit nav-link hover style */
         .dropdown-item {
             color: var(--text-dark) !important;
+        }
+
+        /* Botón de favorito (corazón) en tarjetas */
+        .btn-favorite {
+            background-color: rgba(255, 255, 255, 0.9);
+            border: none;
+            padding: 0.5rem 0.6rem;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+        }
+
+        .btn-favorite:hover {
+            background-color: white;
+            transform: scale(1.15);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .btn-favorite i {
+            transition: all 0.3s ease;
+        }
+
+        /* Responsive: ajustar posición en móviles */
+        @media (max-width: 576px) {
         }
     </style>
 
@@ -321,6 +418,12 @@
                 <a class="nav-link position-relative" href="#" data-bs-toggle="modal" data-bs-target="#cartModal" title="Carrito de compras">
                     <i class="fas fa-shopping-bag fa-lg"></i>
                     <span id="cart-count" class="position-absolute top-10 start-100 translate-middle badge rounded-pill bg-success" style="font-size: 0.6rem; display: none;">0</span>
+                </a>
+                
+                <!-- Favoritos -->
+                <a class="nav-link position-relative" href="#" data-bs-toggle="modal" data-bs-target="#favoritesModal" title="Mis favoritos">
+                    <i class="fas fa-heart fa-lg"></i>
+                    <span id="favorites-count" class="position-absolute top-10 start-100 translate-middle badge rounded-pill bg-danger" style="font-size: 0.6rem; display: none;">0</span>
                 </a>
                 
                 <!-- Hamburger Toggle -->
@@ -448,14 +551,14 @@
                 <div class="col-md-6 text-center">
                     <p class="lead mb-4">¡Chatea con nosotros directamente! Haz clic en el botón de abajo para iniciar una conversación instantánea en WhatsApp.</p>
                     
-                                                                                <a 
-                        href="https://wa.me/527201885871?text=Hola,%20quisiera%20consultar%20sobre%20sus%20productos%20EcoBeauty." 
-                        target="_blank" 
-                        class="btn btn-eco btn-lg"
-                        rel="noopener noreferrer"
-                    >
-                        <i class="fab fa-whatsapp me-2"></i> Chatear por WhatsApp
-                    </a>
+                                        <a 
+                                        href="https://wa.me/527201885871?text=Hola,%20quisiera%20consultar%20sobre%20sus%20productos%20EcoBeauty." 
+                                        target="_blank" 
+                                        class="btn btn-eco btn-lg btn-whatsapp"
+                                        rel="noopener noreferrer"
+                                    >
+                                        <i class="fab fa-whatsapp"></i><span class="btn-text ms-2">Chatear por WhatsApp</span>
+                                    </a>
                                         
                     <p class="mt-3 text-muted small">Tiempo de respuesta habitual: 1 hora.</p>
                 </div>
@@ -472,6 +575,14 @@
             </div>
         </div>
     </footer>
+
+    <!-- Botón flotante para descargar PWA -->
+    <button id="btn-download-pwa" 
+            class="btn btn-eco floating-download-btn"
+            title="Descargar la aplicación"
+            style="display: none;">
+        <i class="fas fa-download me-1"></i>Descargar App
+    </button>
 
     <div class="modal fade" id="cartModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-lg">
@@ -491,6 +602,26 @@
                 <div class="modal-footer">
                     <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Seguir mirando</button>
                     <button type="button" class="btn btn-eco" onclick="window.openCheckout()">Pagar Ahora</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Favoritos -->
+    <div class="modal fade" id="favoritesModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="fas fa-heart me-2 text-danger"></i> Mis Favoritos</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="favorites-items-container">
+                        <p class="text-center text-muted py-3">No hay productos en favoritos.</p>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cerrar</button>
                 </div>
             </div>
         </div>
@@ -654,8 +785,16 @@
                 const img = (p.imagenes && p.imagenes.length) ? p.imagenes[0] : 'https://via.placeholder.com/400x300?text=EcoBeauty';
                 
                 col.innerHTML = `
-                    <div class="card feature-card h-100">
+                    <div class="card feature-card h-100 position-relative">
                         <img src="${img}" class="card-img-top product-img" alt="${p.nombre}">
+                        <button class="btn-favorite position-absolute top-0 end-0 m-2" 
+                            data-id="${p._id}" 
+                            data-name="${p.nombre}"
+                            data-price="${p.precio}"
+                            data-image="${img}"
+                            title="Agregar a favoritos">
+                            <i class="far fa-heart fa-lg text-danger"></i>
+                        </button>
                         <div class="card-body d-flex flex-column">
                             <h5 class="card-title fw-bold">${p.nombre}</h5>
                             <p class="card-text text-muted small">${p.descripcion ? p.descripcion.substring(0,60)+'...' : ''}</p>
@@ -678,13 +817,23 @@
             document.querySelectorAll('.add-btn').forEach(btn => {
                 btn.addEventListener('click', handleAddToCartClick);
             });
+
+            // Asignar eventos a los botones de favoritos
+            document.querySelectorAll('.btn-favorite').forEach(btn => {
+                btn.addEventListener('click', handleFavoriteClick);
+                // Marcar como favorito si ya está en la lista
+                if (isFavorite(btn.dataset.id)) {
+                    btn.querySelector('i').classList.remove('far');
+                    btn.querySelector('i').classList.add('fas');
+                }
+            });
+
+            updateFavoritesCount();
         }
 
         /* -------------------------------------------------------------------------- */
         /* CARRITO DE COMPRAS (Requiere autenticación)  */
         /* -------------------------------------------------------------------------- */
-        
-        // Manejador del clic "Agregar"
         function handleAddToCartClick(e) {
             const btn = e.currentTarget;
             const product = {
@@ -697,6 +846,108 @@
             window.addToCart(product);
             window.showToast('Producto agregado al carrito');
         }
+
+        /* -------------------------------------------------------------------------- */
+        /* LÓGICA DE FAVORITOS */
+        /* -------------------------------------------------------------------------- */
+        
+        const FAVORITES_KEY = 'ecobeautyFavorites';
+
+        function getFavorites() {
+            return JSON.parse(localStorage.getItem(FAVORITES_KEY)) || [];
+        }
+
+        function saveFavorites(favorites) {
+            localStorage.setItem(FAVORITES_KEY, JSON.stringify(favorites));
+            updateFavoritesCount();
+        }
+
+        function isFavorite(productId) {
+            return getFavorites().some(fav => fav.id === productId);
+        }
+
+        function addFavorite(product) {
+            const favorites = getFavorites();
+            if (!isFavorite(product.id)) {
+                favorites.push(product);
+                saveFavorites(favorites);
+            }
+        }
+
+        function removeFavorite(productId) {
+            let favorites = getFavorites();
+            favorites = favorites.filter(fav => fav.id !== productId);
+            saveFavorites(favorites);
+        }
+
+        function handleFavoriteClick(e) {
+            e.preventDefault();
+            const btn = e.currentTarget;
+            const product = {
+                id: btn.dataset.id,
+                name: btn.dataset.name,
+                price: parseFloat(btn.dataset.price),
+                image: btn.dataset.image
+            };
+
+            const icon = btn.querySelector('i');
+            if (isFavorite(product.id)) {
+                removeFavorite(product.id);
+                icon.classList.remove('fas');
+                icon.classList.add('far');
+                window.showToast('Producto removido de favoritos');
+            } else {
+                addFavorite(product);
+                icon.classList.remove('far');
+                icon.classList.add('fas');
+                window.showToast('Producto agregado a favoritos');
+            }
+        }
+
+        function updateFavoritesCount() {
+            const count = getFavorites().length;
+            const countEl = document.getElementById('favorites-count');
+            countEl.textContent = count;
+            countEl.style.display = count > 0 ? 'block' : 'none';
+        }
+
+        window.renderFavorites = function() {
+            const favorites = getFavorites();
+            const container = document.getElementById('favorites-items-container');
+            
+            if (favorites.length === 0) {
+                container.innerHTML = '<p class="text-center text-muted py-3">No hay productos en favoritos.</p>';
+                return;
+            }
+
+            let html = '<div class="row g-3">';
+            favorites.forEach(fav => {
+                html += `
+                    <div class="col-md-4 col-sm-6">
+                        <div class="card feature-card h-100">
+                            <img src="${fav.image}" class="card-img-top product-img" alt="${fav.name}">
+                            <div class="card-body d-flex flex-column">
+                                <h5 class="card-title fw-bold">${fav.name}</h5>
+                                <p class="card-text text-muted small fw-bold text-success mt-2">$${parseFloat(fav.price).toFixed(2)}</p>
+                                <div class="mt-auto d-flex gap-2">
+                                    <button class="btn btn-sm btn-outline-success flex-grow-1" onclick="window.addToCart({id: '${fav.id}', name: '${fav.name}', price: ${fav.price}, quantity: 1}); window.showToast('Producto agregado al carrito');">
+                                        <i class="fas fa-cart-plus"></i> Carrito
+                                    </button>
+                                    <button class="btn btn-sm btn-danger" onclick="window.removeFavorite('${fav.id}'); window.renderFavorites(); window.updateFavoritesCount();">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            html += '</div>';
+            container.innerHTML = html;
+        };
+
+        window.removeFavorite = removeFavorite;
+        window.updateFavoritesCount = updateFavoritesCount;
 
         // --- Funciones del carrito (Globales para el HTML) ---
         const CART_KEY = 'ecobeautyCart';
@@ -972,6 +1223,11 @@
         // Inicializar UI del carrito
         updateCartUI();
 
+        // Renderizar favoritos cuando se abre el modal
+        document.getElementById('favoritesModal').addEventListener('show.bs.modal', function () {
+            window.renderFavorites();
+        });
+
         // --- BÚSQUEDA ---
         const searchInput = document.getElementById('search-input');
         const searchBtn = document.getElementById('search-btn');
@@ -1102,5 +1358,6 @@
     </script>
 </body>
 </html>
+
 
 
